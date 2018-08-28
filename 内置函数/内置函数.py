@@ -25,4 +25,7 @@
 # exec没有返回值， 适合处理简单的流程控制
 #eval只能用在你们明确知道你要执行的代码是什么
 
-print(hash(5))
+d = {'a' : 1, 'b' : 2, 'c' : 3}
+for item ,v in d.items():
+    print(item)
+    print(v)
