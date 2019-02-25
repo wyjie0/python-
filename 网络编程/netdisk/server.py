@@ -1,11 +1,13 @@
 import socket
+import struct
+import json
 
 func = ['上传','下载']
 flag = False
 sk = socket.socket()
 sk.bind(('127.0.0.1', 8080))
 sk.listen()
-
+buffer = 4096
 conn,addr = sk.accept()
 
 user_acount = conn.recv(1024).decode('utf-8')
@@ -31,6 +33,28 @@ with open('userinfo') as f:
                 break
             elif res == '1' or res == '2':
                 conn.send(b'OK!Wait....')
+
+                head_size = conn.recv(4)
+                print(head_size)
+                head_size = struct.unpack('i',head_size)
+                json_head = conn.recv(head_size[0]).decode('utf-8')
+                print('json_head:',json_head)
+                head = json.loads(json_head)
+                print('head:',head)
+                file_size = head['filesize']
+                with open(head['filename'], 'wb') as f:
+                    while file_size > 0:
+                        # print(file_size)
+                        if file_size >= buffer:
+                            content = conn.recv(buffer)
+                            f.write(content)
+                            file_size -= buffer
+                        else:
+                            content = conn.recv(file_size)
+                            f.write(content)
+                            filesize = 0
+                            print('上传完毕')
+
                 break
             else:
                 conn.send(bytes('ERROR:请输入正确的编号！', encoding='utf-8'))
